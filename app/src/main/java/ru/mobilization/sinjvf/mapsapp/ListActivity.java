@@ -2,12 +2,14 @@ package ru.mobilization.sinjvf.mapsapp;
 
 
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -42,6 +44,9 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
     @BindView(R.id.listView)
     RecyclerView recyclerView;
 
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
     CustomAdapter customAdapter;
 
     @Override
@@ -55,6 +60,9 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
         customAdapter = new CustomAdapter(this, Collections.emptyList());
         recyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
         recyclerView.setAdapter(customAdapter);
+
+        toolbar.setTitleTextColor(ContextCompat.getColor(getBaseContext(),android.R.color.white));
+
 
     }
 
@@ -155,7 +163,7 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
                         }
                     })
                     .positiveText(R.string.list_activity_ok)
-                    .negativeText(R.string.list_activity_skip)
+                    .cancelable(false)
                     .show();
             preferenceManager.setFirstTimeUser(false);
         } else
@@ -180,7 +188,8 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
                             filter(adapterItems,school);
                             Collections.sort(adapterItems);
                             customAdapter.setItems(adapterItems);
-                            customAdapter.notifyDataSetChanged();
+                            toolbar.setTitle("Расписание (" + preferenceManager.getSchool()+")");
+                            customAdapter.notifyItemRangeChanged(0,adapterItems.size());
                         },
                         err -> Log.d(TAG, err.getMessage())
                 );
