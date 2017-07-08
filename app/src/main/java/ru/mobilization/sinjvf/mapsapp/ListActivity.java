@@ -6,7 +6,11 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +24,8 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import ru.mobilization.sinjvf.mapsapp.Adapter.CustomAdapter;
+import ru.mobilization.sinjvf.mapsapp.Adapter.NavigationItem;
+import ru.mobilization.sinjvf.mapsapp.data.local.AppPreferenceManager;
 import ru.mobilization.sinjvf.mapsapp.data.MapEvent;
 import ru.mobilization.sinjvf.mapsapp.data.local.LocalService;
 import ru.mobilization.sinjvf.mapsapp.data.model.Location;
@@ -31,6 +37,7 @@ import ru.mobilization.sinjvf.mapsapp.data.model.Schedule;
 public class ListActivity extends AppCompatActivity implements IMapNavigation{
 
     private final String TAG = "ListActivity";
+    private AppPreferenceManager preferenceManager;
 
     @BindView(R.id.listView)
     RecyclerView recyclerView;
@@ -42,46 +49,70 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
         ButterKnife.bind(this);
+        preferenceManager = new AppPreferenceManager();
+        checkFirstTimeLaunch();
 
         customAdapter = new CustomAdapter(this, Collections.emptyList());
         recyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
         recyclerView.setAdapter(customAdapter);
 
-        //TODO: example
-        LocalService localService = new LocalService(getApplicationContext());
-        localService.getJsonData()
-                .subscribe(
-                        mobModel -> {
-                            List<Schedule> adapterItems = mobModel.getSchedule();
-                            filter(adapterItems);
-                            Collections.sort(adapterItems);
-                            customAdapter.setItems(adapterItems);
-                            customAdapter.notifyDataSetChanged();
-                        },
-                        err -> Log.d(TAG, err.getMessage())
-                );
+
     }
 
-    private void filter(List<Schedule> adapterItems) {
+    private void filter(List<Schedule> adapterItems, String school) {
 
         Iterator<Schedule> iterator = adapterItems.iterator();
 
         while (iterator.hasNext()){
             Schedule item = iterator.next();
+
             if(item.getDate().getTime()+item.getDuration()*60*60*1000<System.currentTimeMillis()){
                 iterator.remove();
+            } else {
+
+                boolean show = false;
+
+                for (String sc : item.getSchools()) {
+
+                    if(sc.equals(getEngSchool(school))){
+                        show = true;
+                        break;
+                    }
+                }
+
+                if(!show){
+                    iterator.remove();
+                }
+
             }
+
         }
     }
 
+    private String getEngSchool(String school) {
+        String res = "";
+
+        switch (school){
+            case "ШМР":
+                res = "shnr";
+                break;
+            case "ШРИ":
+                res = "shri";
+                break;
+            case "ШМЯ":
+                res = "shm";
+                break;
+            case "ШМД":
+                res = "shmd";
+                break;
+        }
+
+
+        return res;
+    }
 
     @Override
     public void navigate(Schedule navigationItem) {
-
-        //Intent intent = new Intent(this,MapsActivity.class);
-        //TODO mapping
-        //intent.putExtra("DATA",navigationItem);
-
         LocalService localService = new LocalService(getApplicationContext());
         localService.getJsonData()
                 .observeOn(Schedulers.newThread())
@@ -108,7 +139,52 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
                 },
                 err -> Log.d(TAG, err.getMessage())
         );
+    }
 
+    private void checkFirstTimeLaunch() {
+        if (preferenceManager.getFirstTimeUser()) {
+            new MaterialDialog.Builder(this)
+                    .title(R.string.list_activity_alert_title)
+                    .items(R.array.yandex_schools)
+                    .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                        @Override
+                        public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                            Log.d(TAG, String.valueOf(text.toString()));
+                            initList(text.toString());
+                            preferenceManager.setSchool(text.toString());
+                            return true;
+                        }
+                    })
+                    .positiveText(R.string.list_activity_ok)
+                    .negativeText(R.string.list_activity_skip)
+                    .show();
+            preferenceManager.setFirstTimeUser(false);
+        } else
+            initList(preferenceManager.getSchool());
+        //Intent intent = new Intent(this,MapsActivity.class);
+        //TODO mapping
+        //intent.putExtra("DATA",navigationItem);
+
+
+
+
+    }
+
+    private void initList(String school) {
+
+        //TODO: example
+        LocalService localService = new LocalService(getApplicationContext());
+        localService.getJsonData()
+                .subscribe(
+                        mobModel -> {
+                            List<Schedule> adapterItems = mobModel.getSchedule();
+                            filter(adapterItems,school);
+                            Collections.sort(adapterItems);
+                            customAdapter.setItems(adapterItems);
+                            customAdapter.notifyDataSetChanged();
+                        },
+                        err -> Log.d(TAG, err.getMessage())
+                );
 
     }
 

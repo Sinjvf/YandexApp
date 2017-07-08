@@ -3,4 +3,15 @@
     <string name="title_activity_maps">Map</string>
     <string name="ya_lat">55.73367</string>
     <string name="ya_lon">37.587874</string>
+
+    <!--List activity strings-->
+    <string name="list_activity_alert_title">Выберите школу: </string>
+    <string name="list_activity_ok">Ок</string>
+    <string name="list_activity_skip">Пропустить</string>
+    <string-array name="yandex_schools">
+        <item>ШМР</item>
+        <item>ШРИ</item>
+        <item>ШМЯ</item>
+        <item>ШМД</item>
+    </string-array>
 </resources>
