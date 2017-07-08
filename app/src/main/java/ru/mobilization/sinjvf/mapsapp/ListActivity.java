@@ -1,15 +1,16 @@
 package ru.mobilization.sinjvf.mapsapp;
 
+
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -33,7 +34,6 @@ import ru.mobilization.sinjvf.mapsapp.data.model.MobModel;
 import ru.mobilization.sinjvf.mapsapp.data.model.Place;
 import ru.mobilization.sinjvf.mapsapp.data.model.Schedule;
 
-
 public class ListActivity extends AppCompatActivity implements IMapNavigation{
 
     private final String TAG = "ListActivity";
@@ -55,7 +55,6 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
         customAdapter = new CustomAdapter(this, Collections.emptyList());
         recyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
         recyclerView.setAdapter(customAdapter);
-
 
     }
 
