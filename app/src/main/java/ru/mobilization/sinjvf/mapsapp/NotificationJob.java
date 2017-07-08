@@ -21,8 +21,8 @@ public class NotificationJob extends Job {
     @Override
     protected Result onRunJob(Params params) { // TODO: В NOTIFICATION НАПИСАТЬ СВОИ ДАННЫЕ!!!
         Notification notification = new NotificationCompat.Builder(getContext())
-                .setContentTitle("Android Job Demo")
-                .setContentText("Notification from Android Job Demo App.")
+                .setContentTitle("Напоминание о мобилизации!")
+                .setContentText("Скоро лекция!")
                 .setAutoCancel(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setShowWhen(true)
@@ -37,7 +37,7 @@ public class NotificationJob extends Job {
     static void schedulePeriodicJob() {
         Log.d(TAG, "schedulePeriodicJob: ");
         int jobId = new JobRequest.Builder(NotificationJob.TAG)
-                .setPeriodic(TimeUnit.SECONDS.toMillis(60), TimeUnit.SECONDS.toMillis(30))
+                .setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(5))
                 .setPersisted(true)
                 .build()
                 .schedule();
