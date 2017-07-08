@@ -23,7 +23,8 @@
 
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
@@ -34,25 +35,62 @@
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
                 android:layout_margin="10dp"/>
-            <ImageView
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_below="@+id/title"
-                android:id="@+id/place_pict"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/text"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:gravity="center"/>
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:id="@+id/place_pict"
+                    />
+            </LinearLayout>
 
 
-                android:layout_alignParentRight="true"/>
             <TextView
-                android:layout_below="@+id/title"
-                android:id="@+id/text"
-                android:textSize="16sp"
+                android:id="@+id/go_title"
+                android:text="Добираться:"
+                android:textSize="18sp"
                 android:textColor="@android:color/black"
-                android:layout_toLeftOf="@id/place_pict"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:visibility="gone"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_margin="10dp"
+                android:visibility="gone"
+                android:id="@+id/go_container">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black"
+                    android:id="@+id/time"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black"
+                    android:layout_weight="1"
+                    android:id="@+id/direct"/>
+            </LinearLayout>
 
-        </RelativeLayout>
+
+        </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
     </android.support.design.widget.CoordinatorLayout>

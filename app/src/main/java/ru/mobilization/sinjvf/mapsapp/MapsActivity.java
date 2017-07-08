@@ -2,6 +2,9 @@ package ru.mobilization.sinjvf.mapsapp;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -14,6 +17,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,22 +30,27 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.picasso.Picasso;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import ru.mobilization.sinjvf.mapsapp.retrofit.ServerHandler;
+import ru.mobilization.sinjvf.mapsapp.retrofit.googlePojo.GoogleDirectionData;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-private final String TAG = "TAG"+getClass().getSimpleName();
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
+    private final String TAG = "TAG" + getClass().getSimpleName();
     private GoogleMap mMap;
 
     private BottomSheetBehavior bottomSheetBehavior;
 
-    public static String LATITUDE = "lat";
-    public static String LONTITUDE = "lon";
-    public static String PLACE_LATLON = "place_latlon";
-    public static String PLACE_TITLE = "place_title";
-    public static String PLACE_TEXT = "place_text";
-    public static String PLACE_PICT = "place_pict";
+    public static String MAP_DATA = "map_data";
 
 
     @BindView(R.id.bottom_sheet)
@@ -51,18 +62,28 @@ private final String TAG = "TAG"+getClass().getSimpleName();
     TextView titleView;
     @BindView(R.id.place_pict)
     ImageView imageView;
+    @BindView(R.id.time)
+    TextView timeView;
+    @BindView(R.id.direct)
+    TextView distView;
+    @BindView(R.id.go_title)
+    TextView goTitle;
+    @BindView(R.id.go_container)
+    View goContainer;
 
     public static double DEF_LATITUDE = 55.73367;
     public static double DEF_LONTITUDE = 37.587874;
 
+    private Location lastLocation;
 
     private LatLng place;
     private String text;
     private String title;
     private int pictId;
+    private Date date;
 
 
-
+    private GoogleApiClient googleApiClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,21 +98,75 @@ private final String TAG = "TAG"+getClass().getSimpleName();
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         getArgs();
-    }
-
-    private void getArgs(){
-        Intent intent = getIntent();
-        place = intent.getParcelableExtra(PLACE_LATLON);
-        if (place==null) {
-            place = new LatLng(DEF_LATITUDE, DEF_LONTITUDE);
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
         }
-        title = intent.getStringExtra(PLACE_TITLE);
-        text = intent.getStringExtra(PLACE_TEXT);
-        pictId = intent.getIntExtra(PLACE_PICT, R.drawable.ya);
-        title = TextUtils.isEmpty(title)?getString(R.string.title_yandex):title;
-        text = TextUtils.isEmpty(text)?getString(R.string.text_yandex):text;
     }
 
+    private void getArgs() {
+
+        try {
+            Intent intent = getIntent();
+            MapPojo data = intent.getParcelableExtra(MAP_DATA);
+
+
+            place = new LatLng(data.getLat(), data.getLon());
+            title = data.getTitle();
+            text = data.getName();
+            pictId = data.getPictId();
+            date = data.getDate();
+
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            place = new LatLng(DEF_LATITUDE, DEF_LONTITUDE);
+            title = getString(R.string.title_yandex);
+            text = getString(R.string.text_yandex);
+            pictId = R.drawable.ya;
+            date = Calendar.getInstance().getTime();
+
+        }
+
+        ServerHandler handler = new ServerHandler();
+        LatLng origin = new LatLng(55.73, 37.58);
+        handler.getDirection(origin.toString(), place.toString(), new Callback<GoogleDirectionData>() {
+            @Override
+            public void onResponse(Call<GoogleDirectionData> call, Response<GoogleDirectionData> response) {
+                Log.d(TAG, "onResponse: ");
+            }
+
+            @Override
+            public void onFailure(Call<GoogleDirectionData> call, Throwable t) {
+                Log.d(TAG, "onFailure: ");
+            }
+        });
+    }
+
+
+    private void setDist(GoogleDirectionData resp) {
+        if (resp != null) {
+            goTitle.setText(getString(R.string.go));
+            goTitle.setVisibility(View.VISIBLE);
+            goContainer.setVisibility(View.VISIBLE);
+            try {
+                String time = resp.getRoutes().get(0).getLegs().get(0).getDuration().getText();
+                String dist = resp.getRoutes().get(0).getLegs().get(0).getDistance().getText();
+                timeView.setText(time);
+                distView.setText(dist);
+            }catch(Exception e){
+                setDist(null);
+            }
+        }else{
+
+            goTitle.setText(getString(R.string.fail_location));
+            goTitle.setVisibility(View.GONE);
+            goContainer.setVisibility(View.GONE);
+        }
+    }
 
     /**
      * Manipulates the map once available.
@@ -114,10 +189,10 @@ private final String TAG = "TAG"+getClass().getSimpleName();
 
     }
 
-    private void setMarker(){
+    private void setMarker() {
 
         mMap.addMarker(new MarkerOptions().position(place).title(title));
-    //    mMap.moveCamera(CameraUpdateFactory.newLatLng(place));
+        //    mMap.moveCamera(CameraUpdateFactory.newLatLng(place));
 
         mMap.setOnMarkerClickListener(marker -> {
             setBottomSheet();
@@ -126,14 +201,14 @@ private final String TAG = "TAG"+getClass().getSimpleName();
         setUpCamera(place, false);
     }
 
-    public void setUpCamera(LatLng place, boolean smooth){
+    public void setUpCamera(LatLng place, boolean smooth) {
         Log.d(TAG, "setUpCamera: ");
         CameraUpdate cameraUpdate1 = CameraUpdateFactory.newLatLngZoom(place, 14);
         CameraUpdate cameraUpdate0 = CameraUpdateFactory.newLatLngZoom(place, 13);
 
         if (smooth) {
             mMap.animateCamera(cameraUpdate1);
-        }else{
+        } else {
             mMap.moveCamera(cameraUpdate0);
             mMap.animateCamera(cameraUpdate1);
         }
@@ -141,7 +216,7 @@ private final String TAG = "TAG"+getClass().getSimpleName();
     }
 
     @OnClick(R.id.place_pict)
-    public void showPict(){
+    public void showPict() {
 
         ImageView image = (ImageView) getLayoutInflater().inflate(R.layout.dial_picture, null);
 
@@ -154,7 +229,7 @@ private final String TAG = "TAG"+getClass().getSimpleName();
         dialog.show();
     }
 
-    private void setBottomSheet(){
+    private void setBottomSheet() {
         textView.setText(text);
         titleView.setText(title);
         Picasso.with(this)
@@ -162,5 +237,22 @@ private final String TAG = "TAG"+getClass().getSimpleName();
                 .into(imageView);
 
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        lastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                googleApiClient);
+    //    setUpLocation(false);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }
