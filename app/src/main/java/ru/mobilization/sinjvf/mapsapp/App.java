@@ -1,9 +1,8 @@
 package ru.mobilization.sinjvf.mapsapp;
 
 import android.app.Application;
-
+import com.defaultapps.preferenceshelper.PreferencesHelper;
 import com.evernote.android.job.JobManager;
-
 
 public class App extends Application {
 
@@ -13,5 +12,7 @@ public class App extends Application {
 
         JobManager.create(this).addJobCreator(new NotificationJobCreator());
         JobManager.instance().getConfig().setAllowSmallerIntervalsForMarshmallow(true); // TODO: ЭТО ДЛЯ ТЕСТА, КАК ЗАКОНЧИТЕ СТУКНИТЕ ДАВИТА
+
+        new PreferencesHelper.Builder(this).build();
     }
 }
