@@ -17,18 +17,45 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/small_list_height"
-            android:padding="@dimen/icon_padding"
+            android:padding="@dimen/small_padding"
             style="@style/ClickableItem"
             android:id="@+id/wrapper"
             >
 
             <TextView
+                android:id="@+id/date_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                tools:text="12345"
+                android:textSize="12sp"
                 style="@style/ListText"
-                android:id="@+id/test_item"
+                android:textStyle="italic"
+                />
+
+            <TextView
+                android:id="@+id/teacher_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/date_time"
+                android:layout_alignParentBottom="true"
+                tools:text="Exbntkm"
+                android:lines="1"
+                android:ellipsize="end"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                style="@style/ListText"
+                />
+
+
+            <TextView
+                style="@style/ListText"
+                android:id="@+id/event_name"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
+                android:layout_above="@id/teacher_name"
                 tools:text="12312312312312312312312312321312312312312312312321312312312345"
-
                 />
 
         </RelativeLayout>

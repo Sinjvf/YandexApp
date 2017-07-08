@@ -5,6 +5,8 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import ru.mobilization.sinjvf.mapsapp.Adapter.AdapterItem;
+
 public class MobModel {
 
     @SerializedName("places")

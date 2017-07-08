@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">MapsApp</string>
     <string name="title_activity_maps">Map</string>
+    <string name="ya_lat">55.73367</string>
+    <string name="ya_lon">37.587874</string>
 
     <!--List activity strings-->
     <string name="list_activity_alert_title">Выберите школу: </string>

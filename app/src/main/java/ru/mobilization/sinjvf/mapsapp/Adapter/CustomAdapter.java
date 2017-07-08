@@ -20,9 +20,11 @@ public class CustomAdapter extends RecyclerView.Adapter {
 
     Activity activity;
 
+    public void setItems(List<? extends AdapterItem> items) {
+        this.items = items;
+    }
 
-
-    List<AdapterItem> items;
+    List<? extends AdapterItem> items;
 
     public CustomAdapter(Activity activity, List<AdapterItem> items) {
         this.items = items;
