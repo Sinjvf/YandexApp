@@ -1,7 +1,9 @@
 package ru.mobilization.sinjvf.mapsapp.Adapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,13 +13,13 @@ import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.mobilization.sinjvf.mapsapp.IMapNavigation;
+import ru.mobilization.sinjvf.mapsapp.ListActivity;
 import ru.mobilization.sinjvf.mapsapp.R;
 import ru.mobilization.sinjvf.mapsapp.data.model.Schedule;
 
@@ -81,6 +83,16 @@ public class NavigationDelegate implements AdapterDelegate<List<? extends Adapte
         }
 
 
+        Context context = ((ListActivity)mapNavigation).getBaseContext();
+
+        if(testItem.getDate().getTime()<System.currentTimeMillis() && testItem.getDate().getTime()+testItem.getDuration()*60*60*1000>System.currentTimeMillis()){
+            vh.date.setTextColor(ContextCompat.getColor(context,R.color.first));
+        } else if(testItem.getDate().getTime()<System.currentTimeMillis()+72*60*60*1000){
+            vh.date.setTextColor(ContextCompat.getColor(context,R.color.second));
+        }
+        else {
+            vh.date.setTextColor(ContextCompat.getColor(context,R.color.third));
+        }
 
 
         vh.date.setText(dateOutputFormat.format(date1));
