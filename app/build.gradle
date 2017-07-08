@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "ru.mobilization.sinjvf.mapsapp"
         minSdkVersion 15
-        targetSdkVersion 26
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -33,6 +33,7 @@ dependencies {
     // Because RxAndroid releases are few and far between, it is recommended you also
 // explicitly depend on RxJava's latest version for bug fixes and new features.
     compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.android.support:support-v13:26.+'
     compile 'com.google.android.gms:play-services-maps:11.0.2'
     compile 'com.jakewharton:butterknife:8.7.0'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
@@ -40,6 +41,8 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'io.reactivex.rxjava2:rxjava:2.1.0'
+    compile 'com.github.nikolaymanzhos:preferenceshelper:1.1'
+    compile 'com.afollestad.material-dialogs:core:0.9.4.5'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
 
