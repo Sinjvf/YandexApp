@@ -5,11 +5,11 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -17,13 +17,14 @@ import butterknife.ButterKnife;
 import ru.mobilization.sinjvf.mapsapp.Adapter.AdapterItem;
 import ru.mobilization.sinjvf.mapsapp.Adapter.CustomAdapter;
 import ru.mobilization.sinjvf.mapsapp.Adapter.NavigationItem;
+import ru.mobilization.sinjvf.mapsapp.data.local.AppPreferenceManager;
 import ru.mobilization.sinjvf.mapsapp.data.local.LocalService;
 
-import static java.security.AccessController.getContext;
 
 public class ListActivity extends AppCompatActivity implements IMapNavigation{
 
     private final String TAG = "ListActivity";
+    private AppPreferenceManager preferenceManager;
 
     @BindView(R.id.listView)
     RecyclerView recyclerView;
@@ -35,6 +36,8 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
         ButterKnife.bind(this);
+        preferenceManager = new AppPreferenceManager();
+        checkFirstTimeLaunch();
 
         customAdapter = new CustomAdapter(this, getData());
         recyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
@@ -65,5 +68,25 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
     @Override
     public void navigate(NavigationItem navigationItem) {
 
+    }
+
+    private void checkFirstTimeLaunch() {
+        if (preferenceManager.getFirstTimeUser()) {
+            new MaterialDialog.Builder(this)
+                    .title(R.string.list_activity_alert_title)
+                    .items(R.array.yandex_schools)
+                    .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                        @Override
+                        public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                            Log.d(TAG, String.valueOf(text.toString()));
+                            preferenceManager.setSchool(text.toString());
+                            return true;
+                        }
+                    })
+                    .positiveText(R.string.list_activity_ok)
+                    .negativeText(R.string.list_activity_skip)
+                    .show();
+            preferenceManager.setFirstTimeUser(false);
+        }
     }
 }
