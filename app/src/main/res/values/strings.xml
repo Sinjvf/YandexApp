@@ -18,4 +18,6 @@
     <string name="text_yandex">Здесь проходит наша школа</string>
     <string name="go">Добираться до места:</string>
     <string name="fail_location">Не удалось определить твое местоположение =( </string>
+
+    <string name="map_you_here">Ты здесь</string>
 </resources>

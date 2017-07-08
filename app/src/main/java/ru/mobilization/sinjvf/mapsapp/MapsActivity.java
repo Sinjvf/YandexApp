@@ -1,11 +1,14 @@
 package ru.mobilization.sinjvf.mapsapp;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -19,6 +22,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,6 +32,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
@@ -39,6 +44,7 @@ import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import ru.mobilization.sinjvf.mapsapp.data.MapEvent;
 import ru.mobilization.sinjvf.mapsapp.retrofit.ServerHandler;
 import ru.mobilization.sinjvf.mapsapp.retrofit.googlePojo.GoogleDirectionData;
 
@@ -50,7 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private BottomSheetBehavior bottomSheetBehavior;
 
-    public static String MAP_DATA = "map_data";
+    public static String MAP_DATA = "DATA";
 
 
     @BindView(R.id.bottom_sheet)
@@ -74,6 +80,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static double DEF_LATITUDE = 55.73367;
     public static double DEF_LONTITUDE = 37.587874;
 
+    private Marker userLocationMarker;
     private Location lastLocation;
 
     private LatLng place;
@@ -82,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int pictId;
     private Date date;
 
-
+    private FusedLocationProviderClient mFusedLocationClient;
     private GoogleApiClient googleApiClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,14 +112,73 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .addApi(LocationServices.API)
                     .build();
         }
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: ");
+        googleApiClient.connect();
+
+    }
+
+
+
+    @Override
+    public void onPause() {
+        googleApiClient.disconnect();
+        super.onPause();
+    }
+
+
+    public void setUpLocation() {
+        Log.d(TAG, "setUpLocation: ");
+        if (userLocationMarker!=null){
+            userLocationMarker.remove();
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            Log.d(TAG, "get perm: ");
+        }
+        sendMyLocale(lastLocation);
+    }
+
+
+    private void sendMyLocale(Location lastLocation){
+        if (lastLocation != null) {
+            Log.d(TAG, "setUpLocation: not null!");
+            LatLng llPosition = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+            userLocationMarker = mMap.addMarker(new MarkerOptions()
+                    .position(llPosition)
+                    .title(getString(R.string.map_you_here))
+            );
+            //    setUpCamera(llPosition, smooth);
+
+
+            ServerHandler handler = new ServerHandler();
+            handler.getDirection(llPosition.latitude+","+llPosition.longitude, place.latitude+","+place.longitude, new Callback<GoogleDirectionData>() {
+                @Override
+                public void onResponse(Call<GoogleDirectionData> call, Response<GoogleDirectionData> response) {
+                    Log.d(TAG, "onResponse: ");
+                    setDist(response.body());
+                }
+
+                @Override
+                public void onFailure(Call<GoogleDirectionData> call, Throwable t) {
+                    Log.d(TAG, "onFailure: ");
+                    setDist(null);
+                }
+            });
+        }
+    }
     private void getArgs() {
 
         try {
             Intent intent = getIntent();
-            MapPojo data = intent.getParcelableExtra(MAP_DATA);
-
+            MapEvent data = (MapEvent) intent.getSerializableExtra(MAP_DATA);
+            Log.d(TAG, "getArgs: "+data);
 
             place = new LatLng(data.getLat(), data.getLon());
             title = data.getTitle();
@@ -130,20 +196,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             date = Calendar.getInstance().getTime();
 
         }
-
-        ServerHandler handler = new ServerHandler();
-        LatLng origin = new LatLng(55.73, 37.58);
-        handler.getDirection(origin.toString(), place.toString(), new Callback<GoogleDirectionData>() {
-            @Override
-            public void onResponse(Call<GoogleDirectionData> call, Response<GoogleDirectionData> response) {
-                Log.d(TAG, "onResponse: ");
-            }
-
-            @Override
-            public void onFailure(Call<GoogleDirectionData> call, Throwable t) {
-                Log.d(TAG, "onFailure: ");
-            }
-        });
     }
 
 
@@ -181,11 +233,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
 
         setMarker();
         mMap.setOnMapClickListener(latLng -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN));
-
+    //    mMap.setMyLocationEnabled(true);
 
     }
 
@@ -196,6 +247,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.setOnMarkerClickListener(marker -> {
             setBottomSheet();
+            setUpLocation();
             return true;
         });
         setUpCamera(place, false);
@@ -241,18 +293,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        lastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                googleApiClient);
-    //    setUpLocation(false);
+        lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        Log.d(TAG, "onConnected: ");
+
+        sendMyLocale(lastLocation);
+      /*  mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+
+                    sendMyLocale(location);
+                });*/
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        Log.d(TAG, "onConnectionSuspended: ");
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Log.d(TAG, "onConnectionFailed: ");
     }
 }
