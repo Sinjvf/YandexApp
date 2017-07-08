@@ -1,14 +1,12 @@
 package ru.mobilization.sinjvf.mapsapp;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +17,6 @@ import ru.mobilization.sinjvf.mapsapp.Adapter.CustomAdapter;
 import ru.mobilization.sinjvf.mapsapp.Adapter.NavigationItem;
 import ru.mobilization.sinjvf.mapsapp.data.local.AppPreferenceManager;
 import ru.mobilization.sinjvf.mapsapp.data.local.LocalService;
-
 
 public class ListActivity extends AppCompatActivity implements IMapNavigation{
 
@@ -50,6 +47,8 @@ public class ListActivity extends AppCompatActivity implements IMapNavigation{
                         mobModel -> Log.d(TAG, String.valueOf(mobModel.getPlaces().get(0).getName())),
                         err -> Log.d(TAG, err.getMessage())
                 );
+
+        NotificationJob.schedulePeriodicJob();
     }
 
 
