@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:background="@color/item_background"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/small_list_height">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/small_list_height"
+        android:id="@+id/item_view"
+        style="@style/AppCardView"
+
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/small_list_height"
+            android:padding="@dimen/icon_padding"
+            style="@style/ClickableItem"
+            android:id="@+id/wrapper"
+            >
+
+            <TextView
+                style="@style/ListText"
+                android:id="@+id/test_item"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                tools:text="12312312312312312312312312321312312312312312312321312312312345"
+
+                />
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
+
