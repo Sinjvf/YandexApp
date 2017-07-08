@@ -12,9 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -37,7 +35,6 @@ import ru.mobilization.sinjvf.mapsapp.data.model.Location;
 import ru.mobilization.sinjvf.mapsapp.data.model.MobModel;
 import ru.mobilization.sinjvf.mapsapp.data.model.Place;
 import ru.mobilization.sinjvf.mapsapp.data.model.Schedule;
-
 
 public class ListActivity extends AppCompatActivity implements IMapNavigation{
 
