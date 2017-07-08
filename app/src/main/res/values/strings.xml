@@ -14,4 +14,8 @@
         <item>ШМЯ</item>
         <item>ШМД</item>
     </string-array>
+    <string name="title_yandex">Яндекс</string>
+    <string name="text_yandex">Здесь проходит наша школа</string>
+    <string name="go">Добираться до места:</string>
+    <string name="fail_location">Не удалось определить твое местоположение =( </string>
 </resources>
