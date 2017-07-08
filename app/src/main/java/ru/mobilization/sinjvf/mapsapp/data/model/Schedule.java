@@ -1,11 +1,21 @@
 
 package ru.mobilization.sinjvf.mapsapp.data.model;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Schedule {
+import ru.mobilization.sinjvf.mapsapp.Adapter.AdapterItem;
+
+public class Schedule implements AdapterItem, Comparable<Schedule>{
 
     @SerializedName("duration")
     @Expose
@@ -74,4 +84,35 @@ public class Schedule {
         this.title = title;
     }
 
+    public Date getDate(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date date1 = new Date();
+
+        try {
+            date1 = dateFormat.parse(this.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return date1;
+    }
+
+    @Override
+    public int compareTo(@NonNull Schedule schedule) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date date1 ;
+        Date date2 ;
+
+
+        try {
+            date1 = dateFormat.parse(this.getTime());
+            date2 = dateFormat.parse(schedule.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+
+
+        return date1.getTime() > date2.getTime() ? 1 : date1.getTime()==date2.getTime() ? 0 : -1;
+    }
 }
